@@ -1,5 +1,5 @@
 
-const {flights} = require('../model/Flights')
+const Flight = require('../model/Flights')
 const {v4: uuid} = require('uuid')
 
 
@@ -9,18 +9,17 @@ exports.bookFlight = async(req,res) =>{
 
         const {Title, Price} = await req.body;
         const newFlight = {
-            id: uuid(),
             Title,
-            Price,
-            date: new Date().toLocaleDateString(),
-            time: new Date().toLocaleTimeString()
+            Price
 
         }
-         flights.push(newFlight)
-        res.status(201).json({
-            message: "Flight Created",
-            newFlight,
-    });
+         await newFlight.save()
+   
+         if(!newFlight){
+          return res.status(401).json({message: "could not create a goal"})
+   }
+   
+   res.status(200).json({message: "goal created ", newFlight})
     }
     catch(err){
         res.status(501).json({message: err.message})
@@ -30,10 +29,10 @@ exports.bookFlight = async(req,res) =>{
 exports.getFlights = async(req, res) =>{
 
     try{
-        const Flight =flights;
+        const flights =Flight;
     res.status(200).json({
         message: "All Flights",
-        Flight
+        flights
     })
     }
     catch(err){
@@ -48,7 +47,7 @@ exports.getFlight = async(req,res) =>{
     try{
 
         let id = req.params.id
-        const flight =flights.find((flight) => flight.id === id);
+        const flight =Flight.find((flight) => flight.id === id);
         res.status(200).json({
             message: "Flight Found",
             flight,
@@ -65,7 +64,7 @@ exports.getFlight = async(req,res) =>{
 exports.updateFlight = async(req,res) =>{
     try{
         let id = req.params.id
-    const flight =flights.find((flight) => flight.id === id);
+    const flight =Flight.find((flight) => flight.id === id);
     const {Title, Price} = await req.body
     flight.Tiltle =Title
     flight.Price = Price
@@ -86,8 +85,8 @@ exports.updateFlight = async(req,res) =>{
 exports.deleteFlight = async(req, res) =>{
     try{
         let id = req.params.id
-        const flight =flights.find((flight) => flight.id === id);
-        flights.splice(flights.indexOf(flight),1)
+        const flight =Flight.find((flight) => flight.id === id);
+        Flight.splice(Flight.indexOf(flight),1)
 
         res.status(201).json({
             message: "Flight deleted",
